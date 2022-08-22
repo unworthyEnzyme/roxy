@@ -98,6 +98,8 @@ pub mod scanner {
                 '+' => self.add_token(Token::Punctuation(Punctuations::Plus)),
                 ';' => self.add_token(Token::Punctuation(Punctuations::Semicolon)),
                 '*' => self.add_token(Token::Punctuation(Punctuations::Star)),
+                ' ' | '\r' | '\t' => (),
+                '\n' => self.line += 1,
                 _ => todo!(),
             }
         }
@@ -130,6 +132,28 @@ mod tests {
     #[test]
     fn single_character_tokens() {
         let source = "(){},-*;".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Punctuation(Punctuations::LeftParen),
+                Token::Punctuation(Punctuations::RightParen),
+                Token::Punctuation(Punctuations::LeftBrace),
+                Token::Punctuation(Punctuations::RightBrace),
+                Token::Punctuation(Punctuations::Comma),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Star),
+                Token::Punctuation(Punctuations::Semicolon),
+                Token::EOF
+            ]
+        );
+    }
+    #[test]
+    fn ignore_whitespaec() {
+        let source = r#" ( ) { },    -
+        *;  "#
+            .to_string();
         let mut scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens();
         assert_eq!(
