@@ -136,6 +136,7 @@ pub mod scanner {
                         self.add_token(Token::Punctuation(Punctuations::Slash))
                     }
                 }
+                '"' => self.string(),
                 _ => todo!(),
             }
         }
@@ -173,6 +174,28 @@ pub mod scanner {
                 return '\0';
             }
             self.source.chars().nth(self.current).unwrap()
+        }
+
+        fn string(&mut self) {
+            while self.peek() != '"' && !self.is_at_end() {
+                if self.peek() != '\n' {
+                    self.line += 1;
+                }
+                self.advance();
+            }
+            if self.is_at_end() {
+                panic!("[line {}] Error: Unterminated string literal", self.line);
+            }
+
+            self.advance();
+            /*
+             We shouldn't have to copy this substring.
+             Either i can use &str in the Literals::String type or
+             because i know i won't be using this slice anywhere else
+             i think i can use unsafe block to solve this problem.
+            */
+            let value = String::from(&self.source[self.start + 1..self.current - 1]);
+            self.add_token(Token::Literal(Literals::String { value }));
         }
     }
 }
@@ -282,5 +305,37 @@ mod tests {
                 Token::EOF
             ]
         )
+    }
+    #[test]
+    fn string_literal() {
+        let source = r#""This is a string literal"
+        "This is a
+multiline string
+literal""#
+            .to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Literal(Literals::String {
+                    value: "This is a string literal".to_string(),
+                }),
+                Token::Literal(Literals::String {
+                    value: r#"This is a
+multiline string
+literal"#
+                        .to_string()
+                }),
+                Token::EOF
+            ]
+        )
+    }
+    #[test]
+    #[should_panic]
+    fn unterminated_string_literal() {
+        let source = r#""This is an unterminated string literal"#.to_string();
+        let mut scanner = Scanner::new(source);
+        scanner.scan_tokens();
     }
 }
