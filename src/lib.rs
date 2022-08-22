@@ -42,8 +42,8 @@ pub mod scanner {
     }
     #[derive(Debug)]
     pub struct NumberLiteral {
-        value: f64,
-        raw: String,
+        pub value: f64,
+        pub raw: String,
     }
     impl PartialEq for NumberLiteral {
         fn eq(&self, other: &Self) -> bool {
@@ -137,6 +137,7 @@ pub mod scanner {
                     }
                 }
                 '"' => self.string(),
+                _ if c.is_digit(10) => self.number(),
                 _ => todo!(),
             }
         }
@@ -196,6 +197,33 @@ pub mod scanner {
             */
             let value = String::from(&self.source[self.start + 1..self.current - 1]);
             self.add_token(Token::Literal(Literals::String { value }));
+        }
+
+        fn number(&mut self) {
+            while char::is_digit(self.peek(), 10) {
+                self.advance();
+            }
+            if self.peek() == '.' && char::is_digit(self.peek_next(), 10) {
+                self.advance();
+
+                while char::is_digit(self.peek(), 10) {
+                    self.advance();
+                }
+            }
+            let raw = String::from(&self.source[self.start..self.current]);
+            let value = raw.parse::<f64>().unwrap();
+            self.add_token(Token::Literal(Literals::Number(NumberLiteral {
+                raw,
+                value,
+            })))
+        }
+
+        fn peek_next(&self) -> char {
+            if self.current + 1 >= self.source.len() {
+                '\0'
+            } else {
+                self.source.chars().nth(self.current + 1).unwrap()
+            }
         }
     }
 }
@@ -337,5 +365,22 @@ literal"#
         let source = r#""This is an unterminated string literal"#.to_string();
         let mut scanner = Scanner::new(source);
         scanner.scan_tokens();
+    }
+
+    #[test]
+    fn number_literal() {
+        let source = "123.456".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Literal(Literals::Number(NumberLiteral {
+                    raw: "123.456".to_string(),
+                    value: 123.456
+                })),
+                Token::EOF
+            ]
+        )
     }
 }
