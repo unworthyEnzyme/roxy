@@ -100,6 +100,43 @@ pub mod scanner {
                 '*' => self.add_token(Token::Punctuation(Punctuations::Star)),
                 ' ' | '\r' | '\t' => (),
                 '\n' => self.line += 1,
+                '!' => {
+                    if self.match_char('=') {
+                        self.add_token(Token::Punctuation(Punctuations::BangEqual))
+                    } else {
+                        self.add_token(Token::Punctuation(Punctuations::Bang))
+                    }
+                }
+                '=' => {
+                    if self.match_char('=') {
+                        self.add_token(Token::Punctuation(Punctuations::EqualEqual))
+                    } else {
+                        self.add_token(Token::Punctuation(Punctuations::Equal))
+                    }
+                }
+                '<' => {
+                    if self.match_char('=') {
+                        self.add_token(Token::Punctuation(Punctuations::LessEqual))
+                    } else {
+                        self.add_token(Token::Punctuation(Punctuations::Less))
+                    }
+                }
+                '>' => {
+                    if self.match_char('=') {
+                        self.add_token(Token::Punctuation(Punctuations::GreaterEqual))
+                    } else {
+                        self.add_token(Token::Punctuation(Punctuations::Greater))
+                    }
+                }
+                '/' => {
+                    if self.match_char('/') {
+                        while self.peek() != '\n' && !self.is_at_end() {
+                            self.advance();
+                        }
+                    } else {
+                        self.add_token(Token::Punctuation(Punctuations::Slash))
+                    }
+                }
                 _ => todo!(),
             }
         }
@@ -122,6 +159,21 @@ pub mod scanner {
 
         fn is_at_end(&self) -> bool {
             self.current >= self.source.len()
+        }
+
+        fn match_char(&mut self, c: char) -> bool {
+            if self.is_at_end() || self.source.chars().nth(self.current).unwrap() != c {
+                return false;
+            }
+            self.current += 1;
+            true
+        }
+
+        fn peek(&self) -> char {
+            if self.is_at_end() {
+                return '\0';
+            }
+            self.source.chars().nth(self.current).unwrap()
         }
     }
 }
@@ -170,5 +222,66 @@ mod tests {
                 Token::EOF
             ]
         );
+    }
+    #[test]
+    fn operators() {
+        let source = "! != - - = == < <= > >= */".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Punctuation(Punctuations::Bang),
+                Token::Punctuation(Punctuations::BangEqual),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Equal),
+                Token::Punctuation(Punctuations::EqualEqual),
+                Token::Punctuation(Punctuations::Less),
+                Token::Punctuation(Punctuations::LessEqual),
+                Token::Punctuation(Punctuations::Greater),
+                Token::Punctuation(Punctuations::GreaterEqual),
+                Token::Punctuation(Punctuations::Star),
+                Token::Punctuation(Punctuations::Slash),
+                Token::EOF
+            ]
+        );
+    }
+    #[test]
+    fn comments() {
+        let source = r#"// this is a comment
+        ! != - - = == <
+        <= > >= */ ( ) { },    -
+        *;
+        "#
+        .to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Punctuation(Punctuations::Bang),
+                Token::Punctuation(Punctuations::BangEqual),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Equal),
+                Token::Punctuation(Punctuations::EqualEqual),
+                Token::Punctuation(Punctuations::Less),
+                Token::Punctuation(Punctuations::LessEqual),
+                Token::Punctuation(Punctuations::Greater),
+                Token::Punctuation(Punctuations::GreaterEqual),
+                Token::Punctuation(Punctuations::Star),
+                Token::Punctuation(Punctuations::Slash),
+                Token::Punctuation(Punctuations::LeftParen),
+                Token::Punctuation(Punctuations::RightParen),
+                Token::Punctuation(Punctuations::LeftBrace),
+                Token::Punctuation(Punctuations::RightBrace),
+                Token::Punctuation(Punctuations::Comma),
+                Token::Punctuation(Punctuations::Minus),
+                Token::Punctuation(Punctuations::Star),
+                Token::Punctuation(Punctuations::Semicolon),
+                Token::EOF
+            ]
+        )
     }
 }
