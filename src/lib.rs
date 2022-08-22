@@ -54,7 +54,6 @@ pub mod scanner {
 
     #[derive(Debug, PartialEq, Eq)]
     pub enum Literals {
-        Identifier,
         String { value: String },
         Number(NumberLiteral),
     }
