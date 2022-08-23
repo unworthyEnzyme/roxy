@@ -137,8 +137,8 @@ pub mod scanner {
                     }
                 }
                 '"' => self.string(),
-                _ if c.is_digit(10) => self.number(),
-                _ if c.is_alphabetic() => {
+                _ if Scanner::is_lox_digit(c) => self.number(),
+                _ if Scanner::is_lox_alphabetic(c) => {
                     self.identifier();
                 }
                 _ => todo!(),
@@ -203,13 +203,13 @@ pub mod scanner {
         }
 
         fn number(&mut self) {
-            while char::is_digit(self.peek(), 10) {
+            while Scanner::is_lox_digit(self.peek()) {
                 self.advance();
             }
-            if self.peek() == '.' && char::is_digit(self.peek_next(), 10) {
+            if self.peek() == '.' && Scanner::is_lox_digit(self.peek_next()) {
                 self.advance();
 
-                while char::is_digit(self.peek(), 10) {
+                while Scanner::is_lox_digit(self.peek()) {
                     self.advance();
                 }
             }
@@ -230,7 +230,7 @@ pub mod scanner {
         }
 
         fn identifier(&mut self) {
-            while char::is_alphanumeric(self.peek()) {
+            while Scanner::is_lox_alphanumeric(self.peek()) {
                 self.advance();
             }
             let text = &self.source[self.start..self.current];
@@ -256,6 +256,15 @@ pub mod scanner {
                 },
             };
             self.add_token(token)
+        }
+        fn is_lox_digit(c: char) -> bool {
+            c >= '0' && c <= '9'
+        }
+        fn is_lox_alphabetic(c: char) -> bool {
+            (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
+        }
+        fn is_lox_alphanumeric(c: char) -> bool {
+            Scanner::is_lox_alphabetic(c) || Scanner::is_lox_digit(c)
         }
     }
 }
