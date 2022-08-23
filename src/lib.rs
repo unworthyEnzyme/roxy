@@ -424,4 +424,55 @@ literal"#
             ]
         )
     }
+    #[test]
+    fn keywords() {
+        let source =
+            "and class false fun if nil or print return super this true var while".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Keyword(Keywords::And),
+                Token::Keyword(Keywords::Class),
+                Token::Keyword(Keywords::False),
+                Token::Keyword(Keywords::Fun),
+                Token::Keyword(Keywords::If),
+                Token::Keyword(Keywords::Nil),
+                Token::Keyword(Keywords::Or),
+                Token::Keyword(Keywords::Print),
+                Token::Keyword(Keywords::Return),
+                Token::Keyword(Keywords::Super),
+                Token::Keyword(Keywords::This),
+                Token::Keyword(Keywords::True),
+                Token::Keyword(Keywords::Var),
+                Token::Keyword(Keywords::While),
+                Token::EOF
+            ]
+        )
+    }
+    #[test]
+    fn identifiers() {
+        let source = "variable iffy classy snake_case_variable".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        assert_eq!(
+            *tokens,
+            vec![
+                Token::Identifier {
+                    lexeme: "variable".to_string()
+                },
+                Token::Identifier {
+                    lexeme: "iffy".to_string()
+                },
+                Token::Identifier {
+                    lexeme: "classy".to_string()
+                },
+                Token::Identifier {
+                    lexeme: "snake_case_variable".to_string()
+                },
+                Token::EOF,
+            ]
+        );
+    }
 }
