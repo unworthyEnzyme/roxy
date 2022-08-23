@@ -138,6 +138,9 @@ pub mod scanner {
                 }
                 '"' => self.string(),
                 _ if c.is_digit(10) => self.number(),
+                _ if c.is_alphabetic() => {
+                    self.identifier();
+                }
                 _ => todo!(),
             }
         }
@@ -224,6 +227,35 @@ pub mod scanner {
             } else {
                 self.source.chars().nth(self.current + 1).unwrap()
             }
+        }
+
+        fn identifier(&mut self) {
+            while char::is_alphanumeric(self.peek()) {
+                self.advance();
+            }
+            let text = &self.source[self.start..self.current];
+            let token = match text {
+                "and" => Token::Keyword(Keywords::And),
+                "class" => Token::Keyword(Keywords::Class),
+                "else" => Token::Keyword(Keywords::Else),
+                "false" => Token::Keyword(Keywords::False),
+                "for" => Token::Keyword(Keywords::For),
+                "fun" => Token::Keyword(Keywords::Fun),
+                "if" => Token::Keyword(Keywords::If),
+                "nil" => Token::Keyword(Keywords::Nil),
+                "or" => Token::Keyword(Keywords::Or),
+                "print" => Token::Keyword(Keywords::Print),
+                "return" => Token::Keyword(Keywords::Return),
+                "super" => Token::Keyword(Keywords::Super),
+                "this" => Token::Keyword(Keywords::This),
+                "true" => Token::Keyword(Keywords::True),
+                "var" => Token::Keyword(Keywords::Var),
+                "while" => Token::Keyword(Keywords::While),
+                _ => Token::Identifier {
+                    lexeme: String::from(text),
+                },
+            };
+            self.add_token(token)
         }
     }
 }
