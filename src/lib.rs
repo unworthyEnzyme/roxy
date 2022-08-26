@@ -1,5 +1,7 @@
+pub mod parser;
+
 pub mod scanner {
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum Punctuations {
         Bang,
         BangEqual,
@@ -21,7 +23,7 @@ pub mod scanner {
         Slash,
         Star,
     }
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum Keywords {
         And,
         Class,
@@ -40,7 +42,7 @@ pub mod scanner {
         Var,
         While,
     }
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub struct NumberLiteral {
         pub value: f64,
         pub raw: String,
@@ -52,12 +54,12 @@ pub mod scanner {
     }
     impl Eq for NumberLiteral {}
 
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone)]
     pub enum Literals {
         String { value: String },
         Number(NumberLiteral),
     }
-    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Debug, PartialEq, Eq, Clone)]
     pub enum Token {
         Punctuation(Punctuations),
         Keyword(Keywords),
@@ -66,6 +68,7 @@ pub mod scanner {
         EOF,
     }
 
+    #[derive(Debug, Clone)]
     pub struct Scanner {
         source: String,
         tokens: Vec<Token>,
