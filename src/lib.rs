@@ -1,8 +1,8 @@
 pub mod parser;
 
 pub mod scanner {
-    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-    pub enum Punctuations {
+    #[derive(Debug, PartialEq, Clone)]
+    pub(crate) enum TokenKind {
         Bang,
         BangEqual,
         Equal,
@@ -22,9 +22,6 @@ pub mod scanner {
         Semicolon,
         Slash,
         Star,
-    }
-    #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-    pub enum Keywords {
         And,
         Class,
         Else,
@@ -41,31 +38,17 @@ pub mod scanner {
         True,
         Var,
         While,
-    }
-    #[derive(Debug, Clone)]
-    pub struct NumberLiteral {
-        pub value: f64,
-        pub raw: String,
-    }
-    impl PartialEq for NumberLiteral {
-        fn eq(&self, other: &Self) -> bool {
-            self.raw == other.raw
-        }
-    }
-    impl Eq for NumberLiteral {}
-
-    #[derive(Debug, PartialEq, Eq, Clone)]
-    pub enum Literals {
-        String { value: String },
-        Number(NumberLiteral),
-    }
-    #[derive(Debug, PartialEq, Eq, Clone)]
-    pub enum Token {
-        Punctuation(Punctuations),
-        Keyword(Keywords),
-        Identifier { lexeme: String },
-        Literal(Literals),
+        StringLiteral(String),
+        NumberLiteral(f64),
+        Identifier(String),
         EOF,
+    }
+
+    #[derive(Debug, PartialEq, Clone)]
+    pub(crate) struct Token {
+        pub kind: TokenKind,
+        pub line: usize,
+        pub pos: usize,
     }
 
     #[derive(Debug, Clone)]
@@ -90,44 +73,116 @@ pub mod scanner {
         fn scan_token(&mut self) {
             let c = self.advance();
             match c {
-                '(' => self.add_token(Token::Punctuation(Punctuations::LeftParen)),
-                ')' => self.add_token(Token::Punctuation(Punctuations::RightParen)),
-                '{' => self.add_token(Token::Punctuation(Punctuations::LeftBrace)),
-                '}' => self.add_token(Token::Punctuation(Punctuations::RightBrace)),
-                ',' => self.add_token(Token::Punctuation(Punctuations::Comma)),
-                '.' => self.add_token(Token::Punctuation(Punctuations::Dot)),
-                '-' => self.add_token(Token::Punctuation(Punctuations::Minus)),
-                '+' => self.add_token(Token::Punctuation(Punctuations::Plus)),
-                ';' => self.add_token(Token::Punctuation(Punctuations::Semicolon)),
-                '*' => self.add_token(Token::Punctuation(Punctuations::Star)),
+                '(' => self.add_token(Token {
+                    kind: TokenKind::LeftParen,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                ')' => self.add_token(Token {
+                    kind: TokenKind::RightParen,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '{' => self.add_token(Token {
+                    kind: TokenKind::LeftBrace,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '}' => self.add_token(Token {
+                    kind: TokenKind::RightBrace,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                ',' => self.add_token(Token {
+                    kind: TokenKind::Comma,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '.' => self.add_token(Token {
+                    kind: TokenKind::Dot,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '-' => self.add_token(Token {
+                    kind: TokenKind::Minus,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '+' => self.add_token(Token {
+                    kind: TokenKind::Plus,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                ';' => self.add_token(Token {
+                    kind: TokenKind::Semicolon,
+                    line: self.line,
+                    pos: self.current,
+                }),
+                '*' => self.add_token(Token {
+                    kind: TokenKind::Star,
+                    line: self.line,
+                    pos: self.current,
+                }),
                 ' ' | '\r' | '\t' => (),
                 '\n' => self.line += 1,
                 '!' => {
                     if self.match_char('=') {
-                        self.add_token(Token::Punctuation(Punctuations::BangEqual))
+                        self.add_token(Token {
+                            kind: TokenKind::BangEqual,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     } else {
-                        self.add_token(Token::Punctuation(Punctuations::Bang))
+                        self.add_token(Token {
+                            kind: TokenKind::Bang,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     }
                 }
                 '=' => {
                     if self.match_char('=') {
-                        self.add_token(Token::Punctuation(Punctuations::EqualEqual))
+                        self.add_token(Token {
+                            kind: TokenKind::EqualEqual,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     } else {
-                        self.add_token(Token::Punctuation(Punctuations::Equal))
+                        self.add_token(Token {
+                            kind: TokenKind::Equal,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     }
                 }
                 '<' => {
                     if self.match_char('=') {
-                        self.add_token(Token::Punctuation(Punctuations::LessEqual))
+                        self.add_token(Token {
+                            kind: TokenKind::LessEqual,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     } else {
-                        self.add_token(Token::Punctuation(Punctuations::Less))
+                        self.add_token(Token {
+                            kind: TokenKind::Less,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     }
                 }
                 '>' => {
                     if self.match_char('=') {
-                        self.add_token(Token::Punctuation(Punctuations::GreaterEqual))
+                        self.add_token(Token {
+                            kind: TokenKind::GreaterEqual,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     } else {
-                        self.add_token(Token::Punctuation(Punctuations::Greater))
+                        self.add_token(Token {
+                            kind: TokenKind::Greater,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     }
                 }
                 '/' => {
@@ -136,7 +191,11 @@ pub mod scanner {
                             self.advance();
                         }
                     } else {
-                        self.add_token(Token::Punctuation(Punctuations::Slash))
+                        self.add_token(Token {
+                            kind: TokenKind::Slash,
+                            line: self.line,
+                            pos: self.current,
+                        })
                     }
                 }
                 '"' => self.string(),
@@ -152,7 +211,11 @@ pub mod scanner {
                 self.start = self.current;
                 self.scan_token();
             }
-            self.tokens.push(Token::EOF);
+            self.tokens.push(Token {
+                kind: TokenKind::EOF,
+                line: self.line,
+                pos: self.current,
+            });
             &self.tokens
         }
         fn advance(&mut self) -> char {
@@ -202,7 +265,11 @@ pub mod scanner {
              i think i can use unsafe block to solve this problem.
             */
             let value = String::from(&self.source[self.start + 1..self.current - 1]);
-            self.add_token(Token::Literal(Literals::String { value }));
+            self.add_token(Token {
+                kind: TokenKind::StringLiteral(value),
+                line: self.line,
+                pos: self.current,
+            });
         }
 
         fn number(&mut self) {
@@ -218,10 +285,11 @@ pub mod scanner {
             }
             let raw = String::from(&self.source[self.start..self.current]);
             let value = raw.parse::<f64>().unwrap();
-            self.add_token(Token::Literal(Literals::Number(NumberLiteral {
-                raw,
-                value,
-            })))
+            self.add_token(Token {
+                kind: TokenKind::NumberLiteral(value),
+                line: self.line,
+                pos: self.current,
+            })
         }
 
         fn peek_next(&self) -> char {
@@ -238,24 +306,90 @@ pub mod scanner {
             }
             let text = &self.source[self.start..self.current];
             let token = match text {
-                "and" => Token::Keyword(Keywords::And),
-                "class" => Token::Keyword(Keywords::Class),
-                "else" => Token::Keyword(Keywords::Else),
-                "false" => Token::Keyword(Keywords::False),
-                "for" => Token::Keyword(Keywords::For),
-                "fun" => Token::Keyword(Keywords::Fun),
-                "if" => Token::Keyword(Keywords::If),
-                "nil" => Token::Keyword(Keywords::Nil),
-                "or" => Token::Keyword(Keywords::Or),
-                "print" => Token::Keyword(Keywords::Print),
-                "return" => Token::Keyword(Keywords::Return),
-                "super" => Token::Keyword(Keywords::Super),
-                "this" => Token::Keyword(Keywords::This),
-                "true" => Token::Keyword(Keywords::True),
-                "var" => Token::Keyword(Keywords::Var),
-                "while" => Token::Keyword(Keywords::While),
-                _ => Token::Identifier {
-                    lexeme: String::from(text),
+                "and" => Token {
+                    kind: TokenKind::And,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "class" => Token {
+                    kind: TokenKind::Class,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "else" => Token {
+                    kind: TokenKind::Else,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "false" => Token {
+                    kind: TokenKind::False,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "for" => Token {
+                    kind: TokenKind::For,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "fun" => Token {
+                    kind: TokenKind::Fun,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "if" => Token {
+                    kind: TokenKind::If,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "nil" => Token {
+                    kind: TokenKind::Nil,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "or" => Token {
+                    kind: TokenKind::Or,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "print" => Token {
+                    kind: TokenKind::Print,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "return" => Token {
+                    kind: TokenKind::Return,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "super" => Token {
+                    kind: TokenKind::Super,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "this" => Token {
+                    kind: TokenKind::This,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "true" => Token {
+                    kind: TokenKind::True,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "var" => Token {
+                    kind: TokenKind::Var,
+                    line: self.line,
+                    pos: self.current,
+                },
+                "while" => Token {
+                    kind: TokenKind::While,
+                    line: self.line,
+                    pos: self.current,
+                },
+                _ => Token {
+                    kind: TokenKind::Identifier(String::from(text)),
+                    line: self.line,
+                    pos: self.current,
                 },
             };
             self.add_token(token)
@@ -274,26 +408,71 @@ pub mod scanner {
 
 #[cfg(test)]
 mod tests {
-    use super::scanner::*;
+    use crate::scanner::{Scanner, Token, TokenKind};
     #[test]
     fn single_character_tokens() {
         let source = "(){},-*;".to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Punctuation(Punctuations::LeftParen),
-                Token::Punctuation(Punctuations::RightParen),
-                Token::Punctuation(Punctuations::LeftBrace),
-                Token::Punctuation(Punctuations::RightBrace),
-                Token::Punctuation(Punctuations::Comma),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Star),
-                Token::Punctuation(Punctuations::Semicolon),
-                Token::EOF
+                Token {
+                    kind: TokenKind::LeftParen,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::RightParen,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::LeftBrace,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::RightBrace,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Comma,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Minus,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Star,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Semicolon,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                }
             ]
-        );
+        )
     }
     #[test]
     fn ignore_whitespaec() {
@@ -301,19 +480,64 @@ mod tests {
         *;  "#
             .to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Punctuation(Punctuations::LeftParen),
-                Token::Punctuation(Punctuations::RightParen),
-                Token::Punctuation(Punctuations::LeftBrace),
-                Token::Punctuation(Punctuations::RightBrace),
-                Token::Punctuation(Punctuations::Comma),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Star),
-                Token::Punctuation(Punctuations::Semicolon),
-                Token::EOF
+                Token {
+                    kind: TokenKind::LeftParen,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::RightParen,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::LeftBrace,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::RightBrace,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Comma,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Minus,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Star,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Semicolon,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                },
             ]
         );
     }
@@ -321,60 +545,117 @@ mod tests {
     fn operators() {
         let source = "! != - - = == < <= > >= */".to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Punctuation(Punctuations::Bang),
-                Token::Punctuation(Punctuations::BangEqual),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Equal),
-                Token::Punctuation(Punctuations::EqualEqual),
-                Token::Punctuation(Punctuations::Less),
-                Token::Punctuation(Punctuations::LessEqual),
-                Token::Punctuation(Punctuations::Greater),
-                Token::Punctuation(Punctuations::GreaterEqual),
-                Token::Punctuation(Punctuations::Star),
-                Token::Punctuation(Punctuations::Slash),
-                Token::EOF
+                Token {
+                    kind: TokenKind::BangEqual,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Minus,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Minus,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Equal,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EqualEqual,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Less,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::LessEqual,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Greater,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::GreaterEqual,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Star,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Slash,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                },
             ]
         );
     }
     #[test]
     fn comments() {
         let source = r#"// this is a comment
-        ! != - - = == <
-        <= > >= */ ( ) { },    -
-        *;
+        (), // another comment
         "#
         .to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Punctuation(Punctuations::Bang),
-                Token::Punctuation(Punctuations::BangEqual),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Equal),
-                Token::Punctuation(Punctuations::EqualEqual),
-                Token::Punctuation(Punctuations::Less),
-                Token::Punctuation(Punctuations::LessEqual),
-                Token::Punctuation(Punctuations::Greater),
-                Token::Punctuation(Punctuations::GreaterEqual),
-                Token::Punctuation(Punctuations::Star),
-                Token::Punctuation(Punctuations::Slash),
-                Token::Punctuation(Punctuations::LeftParen),
-                Token::Punctuation(Punctuations::RightParen),
-                Token::Punctuation(Punctuations::LeftBrace),
-                Token::Punctuation(Punctuations::RightBrace),
-                Token::Punctuation(Punctuations::Comma),
-                Token::Punctuation(Punctuations::Minus),
-                Token::Punctuation(Punctuations::Star),
-                Token::Punctuation(Punctuations::Semicolon),
-                Token::EOF
+                Token {
+                    kind: TokenKind::LeftParen,
+                    line: 1,
+                    pos: 0,
+                },
+                Token {
+                    kind: TokenKind::RightParen,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                }
             ]
         )
     }
@@ -386,20 +667,39 @@ multiline string
 literal""#
             .to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Literal(Literals::String {
-                    value: "This is a string literal".to_string(),
-                }),
-                Token::Literal(Literals::String {
-                    value: r#"This is a
+                Token {
+                    kind: TokenKind::StringLiteral("This is a string literal".to_string()),
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::StringLiteral(
+                        "This is a
 multiline string
-literal"#
-                        .to_string()
-                }),
-                Token::EOF
+literal"
+                            .to_string()
+                    ),
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                }
             ]
         )
     }
@@ -419,11 +719,16 @@ literal"#
         assert_eq!(
             *tokens,
             vec![
-                Token::Literal(Literals::Number(NumberLiteral {
-                    raw: "123.456".to_string(),
-                    value: 123.456
-                })),
-                Token::EOF
+                Token {
+                    kind: TokenKind::NumberLiteral(123.456),
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                }
             ]
         )
     }
@@ -432,25 +737,94 @@ literal"#
         let source =
             "and class false fun if nil or print return super this true var while".to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Keyword(Keywords::And),
-                Token::Keyword(Keywords::Class),
-                Token::Keyword(Keywords::False),
-                Token::Keyword(Keywords::Fun),
-                Token::Keyword(Keywords::If),
-                Token::Keyword(Keywords::Nil),
-                Token::Keyword(Keywords::Or),
-                Token::Keyword(Keywords::Print),
-                Token::Keyword(Keywords::Return),
-                Token::Keyword(Keywords::Super),
-                Token::Keyword(Keywords::This),
-                Token::Keyword(Keywords::True),
-                Token::Keyword(Keywords::Var),
-                Token::Keyword(Keywords::While),
-                Token::EOF
+                Token {
+                    kind: TokenKind::And,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Class,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::False,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Fun,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::If,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Nil,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Or,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Print,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Return,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Super,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::This,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::True,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::Var,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::While,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                }
             ]
         )
     }
@@ -458,23 +832,44 @@ literal"#
     fn identifiers() {
         let source = "variable iffy classy snake_case_variable".to_string();
         let mut scanner = Scanner::new(source);
-        let tokens = scanner.scan_tokens();
+        let tokens = scanner
+            .scan_tokens()
+            .iter()
+            .map(|&token| Token {
+                kind: token.kind,
+                // Because i don't want to track positions when writing tests.
+                line: 1,
+                pos: 0,
+            })
+            .collect::<Vec<Token>>();
         assert_eq!(
             *tokens,
             vec![
-                Token::Identifier {
-                    lexeme: "variable".to_string()
+                Token {
+                    kind: TokenKind::Identifier("variable".to_string()),
+                    line: 1,
+                    pos: 0
                 },
-                Token::Identifier {
-                    lexeme: "iffy".to_string()
+                Token {
+                    kind: TokenKind::Identifier("iffy".to_string()),
+                    line: 1,
+                    pos: 0
                 },
-                Token::Identifier {
-                    lexeme: "classy".to_string()
+                Token {
+                    kind: TokenKind::Identifier("classy".to_string()),
+                    line: 1,
+                    pos: 0
                 },
-                Token::Identifier {
-                    lexeme: "snake_case_variable".to_string()
+                Token {
+                    kind: TokenKind::Identifier("snake_case_variable".to_string()),
+                    line: 1,
+                    pos: 0
                 },
-                Token::EOF,
+                Token {
+                    kind: TokenKind::EOF,
+                    line: 1,
+                    pos: 0
+                },
             ]
         );
     }
