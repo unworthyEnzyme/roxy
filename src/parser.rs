@@ -102,7 +102,7 @@ impl Parser {
             let right = self.comparison();
             expr = Expr::Binary(Binary {
                 left: Box::new(expr.clone()),
-                operator: operator.clone(),
+                operator,
                 right: Box::new(right.clone()),
             })
         }
@@ -128,7 +128,7 @@ impl Parser {
             let right = self.term();
             expr = Expr::Binary(Binary {
                 left: Box::new(expr.clone()),
-                operator: operator.clone(),
+                operator,
                 right: Box::new(right.clone()),
             })
         }
@@ -175,7 +175,7 @@ impl Parser {
             let right = self.factor();
             expr = Expr::Binary(Binary {
                 left: Box::new(expr.clone()),
-                operator: operator.clone(),
+                operator,
                 right: Box::new(right.clone()),
             })
         }
@@ -194,7 +194,7 @@ impl Parser {
             let right = self.unary();
             expr = Expr::Binary(Binary {
                 left: Box::new(expr.clone()),
-                operator: operator.clone(),
+                operator,
                 right: Box::new(right.clone()),
             })
         }
@@ -212,7 +212,7 @@ impl Parser {
             };
             let right = self.unary();
             return Expr::Unary(Unary {
-                operator: operator.clone(),
+                operator,
                 right: Box::new(right),
             });
         }
@@ -222,11 +222,11 @@ impl Parser {
 
     fn primary(&mut self) -> Expr {
         if self.match_tokens(vec![TokenKind::False]) {
-            return Expr::Literal(Literal::Boolean(false));
+            Expr::Literal(Literal::Boolean(false))
         } else if self.match_tokens(vec![TokenKind::True]) {
-            return Expr::Literal(Literal::Boolean(true));
+            Expr::Literal(Literal::Boolean(true))
         } else if self.match_tokens(vec![TokenKind::Nil]) {
-            return Expr::Literal(Literal::Nil);
+            Expr::Literal(Literal::Nil)
         } else if matches!(
             self.tokens[self.current].clone().kind,
             TokenKind::NumberLiteral(_),
@@ -252,7 +252,7 @@ impl Parser {
                     let expr = self.expression();
                     self.consume(TokenKind::RightParen, "Expect ')' after expression");
                     Expr::Grouping(Grouping {
-                        expr: Box::new(expr.clone()),
+                        expr: Box::new(expr),
                     })
                 }
                 false => panic!("is this part unreachable?"),
@@ -262,7 +262,7 @@ impl Parser {
 
     fn consume(&mut self, token: TokenKind, err_msg: &str) -> Token {
         if self.check(token) {
-            return self.advance();
+            self.advance()
         } else {
             panic!("{:#?} {}", self.peek(), err_msg);
         }
@@ -280,7 +280,7 @@ mod parser_tests {
         let mut scanner = Scanner::new(source);
         let tokens = scanner.scan_tokens();
         let (_, tail) = tokens.split_last().unwrap();
-        let mut parser = Parser::new(tail.to_vec().clone());
+        let mut parser = Parser::new(tail.to_vec());
         let mut literals: Vec<Literal> = vec![];
         for _ in tail {
             literals.push(parser.literal().unwrap())
