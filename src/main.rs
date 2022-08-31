@@ -1,4 +1,4 @@
-use lox_in_rust::scanner::*;
+use roxy::scanner::*;
 
 fn main() {
     let source = "(){},-*;".to_string();

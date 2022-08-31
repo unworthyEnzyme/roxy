@@ -1,5 +1,5 @@
 [package]
-name = "lox_in_rust"
+name = "roxy"
 version = "0.1.0"
 edition = "2021"
 
