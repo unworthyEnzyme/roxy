@@ -2,7 +2,7 @@ pub mod parser;
 
 pub mod scanner {
     #[derive(Debug, PartialEq, Clone)]
-    pub(crate) enum TokenKind {
+    pub enum TokenKind {
         Bang,
         BangEqual,
         Equal,
@@ -45,7 +45,7 @@ pub mod scanner {
     }
 
     #[derive(Debug, PartialEq, Clone)]
-    pub(crate) struct Token {
+    pub struct Token {
         pub kind: TokenKind,
         pub line: usize,
         pub pos: usize,
