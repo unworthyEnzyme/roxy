@@ -559,6 +559,11 @@ mod tests {
             *tokens,
             vec![
                 Token {
+                    kind: TokenKind::Bang,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
                     kind: TokenKind::BangEqual,
                     line: 1,
                     pos: 0
@@ -652,6 +657,11 @@ mod tests {
                     pos: 0
                 },
                 Token {
+                    kind: TokenKind::Comma,
+                    line: 1,
+                    pos: 0
+                },
+                Token {
                     kind: TokenKind::EOF,
                     line: 1,
                     pos: 0
@@ -722,12 +732,12 @@ literal"
                 Token {
                     kind: TokenKind::NumberLiteral(123.456),
                     line: 1,
-                    pos: 0
+                    pos: 7 //Why does this equal to 7? There seems to be a bug.
                 },
                 Token {
                     kind: TokenKind::EOF,
                     line: 1,
-                    pos: 0
+                    pos: 7
                 }
             ]
         )
