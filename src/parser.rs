@@ -1,4 +1,4 @@
-use crate::scanner::{Keywords, Literals, NumberLiteral, Punctuations, Token};
+use crate::scanner::{Token, TokenKind};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -66,12 +66,12 @@ impl Parser {
 
     pub fn literal(&mut self) -> Result<Literal, ()> {
         let token = self.tokens[self.current].clone();
-        let token = match token {
-            Token::Literal(Literals::String { value }) => Ok(Literal::String(value)),
-            Token::Literal(Literals::Number(n)) => Ok(Literal::Number(n.value)),
-            Token::Keyword(Keywords::True) => Ok(Literal::Boolean(true)),
-            Token::Keyword(Keywords::False) => Ok(Literal::Boolean(false)),
-            Token::Keyword(Keywords::Nil) => Ok(Literal::Nil),
+        let token = match token.kind {
+            TokenKind::StringLiteral(s) => Ok(Literal::String(s)),
+            TokenKind::NumberLiteral(n) => Ok(Literal::Number(n)),
+            TokenKind::True => Ok(Literal::Boolean(true)),
+            TokenKind::False => Ok(Literal::Boolean(false)),
+            TokenKind::Nil => Ok(Literal::Nil),
             _ => Err(()),
         };
         self.current += 1;
@@ -83,7 +83,7 @@ impl Parser {
     }
 
     fn is_at_end(&self) -> bool {
-        self.peek() == &Token::EOF
+        self.peek().kind == TokenKind::EOF
     }
 
     fn peek(&self) -> &Token {
@@ -92,14 +92,11 @@ impl Parser {
 
     fn equality(&mut self) -> Expr {
         let mut expr = self.comparison();
-        while self.match_tokens(vec![
-            Token::Punctuation(Punctuations::BangEqual),
-            Token::Punctuation(Punctuations::EqualEqual),
-        ]) {
+        while self.match_tokens(vec![TokenKind::BangEqual, TokenKind::EqualEqual]) {
             let operator = self.previous();
-            let operator = match operator {
-                Token::Punctuation(Punctuations::BangEqual) => BinaryOperator::NotEqual,
-                Token::Punctuation(Punctuations::EqualEqual) => BinaryOperator::EqualEqual,
+            let operator = match operator.kind {
+                TokenKind::BangEqual => BinaryOperator::NotEqual,
+                TokenKind::EqualEqual => BinaryOperator::EqualEqual,
                 _ => panic!("only != and == is allowed"),
             };
             let right = self.comparison();
@@ -115,17 +112,17 @@ impl Parser {
     fn comparison(&mut self) -> Expr {
         let mut expr = self.term();
         while self.match_tokens(vec![
-            Token::Punctuation(Punctuations::Greater),
-            Token::Punctuation(Punctuations::GreaterEqual),
-            Token::Punctuation(Punctuations::Less),
-            Token::Punctuation(Punctuations::LessEqual),
+            TokenKind::Greater,
+            TokenKind::GreaterEqual,
+            TokenKind::Less,
+            TokenKind::LessEqual,
         ]) {
             let operator = self.previous();
-            let operator = match operator {
-                Token::Punctuation(Punctuations::Greater) => BinaryOperator::GreaterThan,
-                Token::Punctuation(Punctuations::GreaterEqual) => BinaryOperator::GreaterThanEqual,
-                Token::Punctuation(Punctuations::Less) => BinaryOperator::LessThan,
-                Token::Punctuation(Punctuations::LessEqual) => BinaryOperator::LessThanEqual,
+            let operator = match operator.kind {
+                TokenKind::Greater => BinaryOperator::GreaterThan,
+                TokenKind::GreaterEqual => BinaryOperator::GreaterThanEqual,
+                TokenKind::Less => BinaryOperator::LessThan,
+                TokenKind::LessEqual => BinaryOperator::LessThanEqual,
                 _ => panic!("only >, >=, < and <= is allowed as an operator"),
             };
             let right = self.term();
@@ -138,7 +135,7 @@ impl Parser {
         expr
     }
 
-    fn match_tokens(&mut self, tokens: Vec<Token>) -> bool {
+    fn match_tokens(&mut self, tokens: Vec<TokenKind>) -> bool {
         for token in tokens {
             if self.check(token) {
                 self.advance();
@@ -152,11 +149,11 @@ impl Parser {
         self.tokens[self.current - 1].clone()
     }
 
-    fn check(&self, token: Token) -> bool {
+    fn check(&self, token: TokenKind) -> bool {
         if self.is_at_end() {
             return false;
         }
-        self.peek() == &token
+        self.peek().kind == token
     }
 
     fn advance(&mut self) -> Token {
@@ -168,14 +165,11 @@ impl Parser {
 
     fn term(&mut self) -> Expr {
         let mut expr = self.factor();
-        while self.match_tokens(vec![
-            Token::Punctuation(Punctuations::Minus),
-            Token::Punctuation(Punctuations::Plus),
-        ]) {
+        while self.match_tokens(vec![TokenKind::Minus, TokenKind::Plus]) {
             let operator = self.previous();
-            let operator = match operator {
-                Token::Punctuation(Punctuations::Minus) => BinaryOperator::Minus,
-                Token::Punctuation(Punctuations::Plus) => BinaryOperator::Plus,
+            let operator = match operator.kind {
+                TokenKind::Minus => BinaryOperator::Minus,
+                TokenKind::Plus => BinaryOperator::Plus,
                 _ => panic!("Only - and + operators are allowed"),
             };
             let right = self.factor();
@@ -190,14 +184,11 @@ impl Parser {
 
     fn factor(&mut self) -> Expr {
         let mut expr = self.unary();
-        while self.match_tokens(vec![
-            Token::Punctuation(Punctuations::Slash),
-            Token::Punctuation(Punctuations::Star),
-        ]) {
+        while self.match_tokens(vec![TokenKind::Slash, TokenKind::Star]) {
             let operator = self.previous();
-            let operator = match operator {
-                Token::Punctuation(Punctuations::Slash) => BinaryOperator::Divide,
-                Token::Punctuation(Punctuations::Star) => BinaryOperator::Multiply,
+            let operator = match operator.kind {
+                TokenKind::Slash => BinaryOperator::Divide,
+                TokenKind::Star => BinaryOperator::Multiply,
                 _ => panic!("only / and * is allowed as an operator"),
             };
             let right = self.unary();
@@ -211,15 +202,12 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Expr {
-        if self.match_tokens(vec![
-            Token::Punctuation(Punctuations::Bang),
-            Token::Punctuation(Punctuations::Minus),
-        ]) {
+        if self.match_tokens(vec![TokenKind::Bang, TokenKind::Minus]) {
             let operator = self.previous();
             print!("{:?}", operator);
-            let operator = match operator {
-                Token::Punctuation(Punctuations::Bang) => UnaryOperator::Not,
-                Token::Punctuation(Punctuations::Minus) => UnaryOperator::Minus,
+            let operator = match operator.kind {
+                TokenKind::Bang => UnaryOperator::Not,
+                TokenKind::Minus => UnaryOperator::Minus,
                 _ => panic!("Only ! and - operator is allowed"),
             };
             let right = self.unary();
@@ -233,39 +221,36 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Expr {
-        if self.match_tokens(vec![Token::Keyword(Keywords::False)]) {
+        if self.match_tokens(vec![TokenKind::False]) {
             return Expr::Literal(Literal::Boolean(false));
-        } else if self.match_tokens(vec![Token::Keyword(Keywords::True)]) {
+        } else if self.match_tokens(vec![TokenKind::True]) {
             return Expr::Literal(Literal::Boolean(true));
-        } else if self.match_tokens(vec![Token::Keyword(Keywords::Nil)]) {
+        } else if self.match_tokens(vec![TokenKind::Nil]) {
             return Expr::Literal(Literal::Nil);
         } else if matches!(
-            self.tokens[self.current].clone(),
-            Token::Literal(Literals::Number(_))
+            self.tokens[self.current].clone().kind,
+            TokenKind::NumberLiteral(_),
         ) | matches!(
-            self.tokens[self.current].clone(),
-            Token::Literal(Literals::String { value })
+            self.tokens[self.current].clone().kind,
+            TokenKind::StringLiteral(_),
         ) {
             let token = self.tokens[self.current].clone();
-            return match token {
-                Token::Literal(Literals::Number(NumberLiteral { value, .. })) => {
+            return match token.kind {
+                TokenKind::NumberLiteral(n) => {
                     self.advance();
-                    Expr::Literal(Literal::Number(value))
+                    Expr::Literal(Literal::Number(n))
                 }
-                Token::Literal(Literals::String { value }) => {
+                TokenKind::StringLiteral(s) => {
                     self.advance();
-                    Expr::Literal(Literal::String(value))
+                    Expr::Literal(Literal::String(s))
                 }
                 _ => panic!("Only strings or numbers allowed"),
             };
         } else {
-            match self.match_tokens(vec![Token::Punctuation(Punctuations::LeftParen)]) {
+            match self.match_tokens(vec![TokenKind::LeftParen]) {
                 true => {
                     let expr = self.expression();
-                    self.consume(
-                        Token::Punctuation(Punctuations::RightParen),
-                        "Expect ')' after expression",
-                    );
+                    self.consume(TokenKind::RightParen, "Expect ')' after expression");
                     Expr::Grouping(Grouping {
                         expr: Box::new(expr.clone()),
                     })
@@ -275,7 +260,7 @@ impl Parser {
         }
     }
 
-    fn consume(&mut self, token: Token, err_msg: &str) -> Token {
+    fn consume(&mut self, token: TokenKind, err_msg: &str) -> Token {
         if self.check(token) {
             return self.advance();
         } else {
