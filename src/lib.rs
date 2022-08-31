@@ -416,8 +416,8 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -483,8 +483,8 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -548,8 +548,8 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -631,8 +631,8 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -670,8 +670,8 @@ literal""#
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -740,8 +740,8 @@ literal"
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
@@ -835,8 +835,8 @@ literal"
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|&token| Token {
-                kind: token.kind,
+            .map(|token| Token {
+                kind: token.kind.clone(),
                 // Because i don't want to track positions when writing tests.
                 line: 1,
                 pos: 0,
