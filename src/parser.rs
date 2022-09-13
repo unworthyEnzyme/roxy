@@ -42,8 +42,8 @@ pub enum UnaryOperator {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Unary {
-    operator: UnaryOperator,
-    right: Box<Expr>,
+    pub operator: UnaryOperator,
+    pub right: Box<Expr>,
 }
 
 #[derive(Debug, PartialEq, Clone)]

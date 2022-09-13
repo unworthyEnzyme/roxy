@@ -1,4 +1,4 @@
-use crate::parser::{Expr, Literal};
+use crate::parser::{Expr, Literal, UnaryOperator};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
@@ -12,7 +12,7 @@ pub struct Intrepreter {}
 
 impl Intrepreter {
     //should this function take the ownership of `expr`?
-    fn eval(expr: Expr) -> Value {
+    pub fn eval(expr: Expr) -> Value {
         match expr {
             Expr::Binary(b) => todo!(),
             Expr::Grouping(g) => Intrepreter::eval(*g.expr),
@@ -22,7 +22,26 @@ impl Intrepreter {
                 Literal::Boolean(b) => Value::Boolean(b),
                 Literal::Nil => Value::Nil,
             },
-            Expr::Unary(u) => todo!(),
+            Expr::Unary(u) => {
+                let right = Intrepreter::eval(*u.right);
+                match u.operator {
+                    UnaryOperator::Minus => {
+                        if let Value::Number(n) = right {
+                            Value::Number(-n)
+                        } else {
+                            panic!("You can only negate a number")
+                        }
+                    }
+                    UnaryOperator::Not => Value::Boolean(!Intrepreter::is_truthy(&right)),
+                }
+            }
+        }
+    }
+    fn is_truthy(right: &Value) -> bool {
+        match right {
+            Value::Nil => false,
+            Value::Boolean(b) => *b,
+            _ => true,
         }
     }
 }
@@ -30,7 +49,7 @@ impl Intrepreter {
 #[cfg(test)]
 mod interpreter_tests {
     use super::{Intrepreter, Value};
-    use crate::parser::{Expr, Literal};
+    use crate::parser::{Expr, Literal, Unary, UnaryOperator};
 
     #[test]
     fn number_literal() {
@@ -58,5 +77,27 @@ mod interpreter_tests {
         let expr = Expr::Literal(Literal::Nil);
         let value = Intrepreter::eval(expr);
         assert_eq!(value, Value::Nil);
+    }
+
+    #[test]
+    fn unary_expr_number() {
+        let expr = Expr::Unary(Unary {
+            operator: UnaryOperator::Minus,
+            right: Box::new(Expr::Literal(Literal::Number(42.0))),
+        });
+
+        let val = Intrepreter::eval(expr);
+        assert_eq!(val, Value::Number(-42.0));
+    }
+
+    #[test]
+    fn unary_expr_bool() {
+        let expr = Expr::Unary(Unary {
+            operator: UnaryOperator::Not,
+            right: Box::new(Expr::Literal(Literal::Boolean(false))),
+        });
+
+        let val = Intrepreter::eval(expr);
+        assert_eq!(val, Value::Boolean(true));
     }
 }
