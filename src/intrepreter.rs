@@ -15,7 +15,7 @@ impl Intrepreter {
     fn eval(expr: Expr) -> Value {
         match expr {
             Expr::Binary(b) => todo!(),
-            Expr::Grouping(g) => todo!(),
+            Expr::Grouping(g) => Intrepreter::eval(*g.expr),
             Expr::Literal(l) => match l {
                 Literal::String(s) => Value::String(s),
                 Literal::Number(n) => Value::Number(n),

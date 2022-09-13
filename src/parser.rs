@@ -56,7 +56,7 @@ pub enum Literal {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Grouping {
-    expr: Box<Expr>,
+    pub expr: Box<Expr>,
 }
 
 impl Parser {
