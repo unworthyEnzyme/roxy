@@ -12,18 +12,18 @@ pub struct Intrepreter {}
 
 impl Intrepreter {
     //should this function take the ownership of `expr`?
-    pub fn eval(expr: Expr) -> Value {
+    pub fn eval(expr: &Expr) -> Value {
         match expr {
             Expr::Binary(b) => todo!(),
-            Expr::Grouping(g) => Intrepreter::eval(*g.expr),
+            Expr::Grouping(g) => Intrepreter::eval(&g.expr),
             Expr::Literal(l) => match l {
-                Literal::String(s) => Value::String(s),
-                Literal::Number(n) => Value::Number(n),
-                Literal::Boolean(b) => Value::Boolean(b),
+                Literal::String(s) => Value::String(s.to_string()),
+                Literal::Number(n) => Value::Number(*n),
+                Literal::Boolean(b) => Value::Boolean(*b),
                 Literal::Nil => Value::Nil,
             },
             Expr::Unary(u) => {
-                let right = Intrepreter::eval(*u.right);
+                let right = Intrepreter::eval(&u.right);
                 match u.operator {
                     UnaryOperator::Minus => {
                         if let Value::Number(n) = right {
@@ -54,28 +54,28 @@ mod interpreter_tests {
     #[test]
     fn number_literal() {
         let expr = Expr::Literal(Literal::Number(123.2));
-        let value = Intrepreter::eval(expr);
+        let value = Intrepreter::eval(&expr);
         assert_eq!(value, Value::Number(123.2));
     }
 
     #[test]
     fn string_literal() {
         let expr = Expr::Literal(Literal::String("string".to_string()));
-        let value = Intrepreter::eval(expr);
+        let value = Intrepreter::eval(&expr);
         assert_eq!(value, Value::String("string".to_string()));
     }
 
     #[test]
     fn bool_literal() {
         let expr = Expr::Literal(Literal::Boolean(false));
-        let value = Intrepreter::eval(expr);
+        let value = Intrepreter::eval(&expr);
         assert_eq!(value, Value::Boolean(false));
     }
 
     #[test]
     fn nil_literal() {
         let expr = Expr::Literal(Literal::Nil);
-        let value = Intrepreter::eval(expr);
+        let value = Intrepreter::eval(&expr);
         assert_eq!(value, Value::Nil);
     }
 
@@ -86,7 +86,7 @@ mod interpreter_tests {
             right: Box::new(Expr::Literal(Literal::Number(42.0))),
         });
 
-        let val = Intrepreter::eval(expr);
+        let val = Intrepreter::eval(&expr);
         assert_eq!(val, Value::Number(-42.0));
     }
 
@@ -97,7 +97,7 @@ mod interpreter_tests {
             right: Box::new(Expr::Literal(Literal::Boolean(false))),
         });
 
-        let val = Intrepreter::eval(expr);
+        let val = Intrepreter::eval(&expr);
         assert_eq!(val, Value::Boolean(true));
     }
 }
