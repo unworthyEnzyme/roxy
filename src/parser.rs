@@ -29,9 +29,9 @@ pub enum BinaryOperator {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Binary {
-    left: Box<Expr>,
-    operator: BinaryOperator,
-    right: Box<Expr>,
+    pub left: Box<Expr>,
+    pub operator: BinaryOperator,
+    pub right: Box<Expr>,
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
