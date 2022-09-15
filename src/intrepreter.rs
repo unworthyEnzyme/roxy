@@ -1,4 +1,4 @@
-use crate::parser::{Expr, Literal, UnaryOperator};
+use crate::parser::{BinaryOperator, Expr, Literal, UnaryOperator};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
@@ -14,7 +14,71 @@ impl Intrepreter {
     //should this function take the ownership of `expr`?
     pub fn eval(expr: &Expr) -> Value {
         match expr {
-            Expr::Binary(b) => todo!(),
+            Expr::Binary(b) => {
+                let left = Intrepreter::eval(&b.left);
+                let right = Intrepreter::eval(&b.right);
+                match b.operator {
+                    BinaryOperator::Minus => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Number(n1 - n2)
+                        } else {
+                            panic!("You can only substract numbers")
+                        }
+                    }
+                    BinaryOperator::Plus => match (left, right) {
+                        (Value::Number(n1), Value::Number(n2)) => Value::Number(n1 + n2),
+                        (Value::String(s1), Value::String(s2)) => {
+                            Value::String(format!("{}{}", s1, s2))
+                        }
+                        _ => panic!("You can only add strings or numbers"),
+                    },
+                    BinaryOperator::Multiply => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Number(n1 * n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    BinaryOperator::Divide => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Number(n1 / n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    BinaryOperator::GreaterThan => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Boolean(n1 > n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    BinaryOperator::LessThan => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Boolean(n1 < n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    BinaryOperator::GreaterThanEqual => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Boolean(n1 >= n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    BinaryOperator::LessThanEqual => {
+                        if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
+                            Value::Boolean(n1 <= n2)
+                        } else {
+                            panic!("You can only multiply numbers")
+                        }
+                    }
+                    //What happens in the case of non-primitive values?
+                    BinaryOperator::EqualEqual => Value::Boolean(left == right),
+                    BinaryOperator::NotEqual => Value::Boolean(left != right),
+                }
+            }
             Expr::Grouping(g) => Intrepreter::eval(&g.expr),
             Expr::Literal(l) => match l {
                 Literal::String(s) => Value::String(s.to_string()),
@@ -49,7 +113,10 @@ impl Intrepreter {
 #[cfg(test)]
 mod interpreter_tests {
     use super::{Intrepreter, Value};
-    use crate::parser::{Expr, Literal, Unary, UnaryOperator};
+    use crate::{
+        parser::{Expr, Literal, Parser, Unary, UnaryOperator},
+        scanner::Scanner,
+    };
 
     #[test]
     fn number_literal() {
@@ -99,5 +166,16 @@ mod interpreter_tests {
 
         let val = Intrepreter::eval(&expr);
         assert_eq!(val, Value::Boolean(true));
+    }
+
+    #[test]
+    fn binary_expression() {
+        let source = "(5 - (3 - 1)) + -1".to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        let mut parser = Parser::new(tokens.clone());
+        let expr = parser.expression();
+        let val = Intrepreter::eval(&expr);
+        assert_eq!(val, Value::Number(2.0));
     }
 }
