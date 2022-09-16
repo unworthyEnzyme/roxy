@@ -11,7 +11,6 @@ pub enum Value {
 pub struct Interpreter {}
 
 impl Interpreter {
-    //should this function take the ownership of `expr`?
     pub fn eval(expr: &Expr) -> Value {
         match expr {
             Expr::Binary(b) => {
