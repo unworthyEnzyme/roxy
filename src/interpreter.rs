@@ -8,15 +8,15 @@ pub enum Value {
     Nil,
 }
 
-pub struct Intrepreter {}
+pub struct Interpreter {}
 
-impl Intrepreter {
+impl Interpreter {
     //should this function take the ownership of `expr`?
     pub fn eval(expr: &Expr) -> Value {
         match expr {
             Expr::Binary(b) => {
-                let left = Intrepreter::eval(&b.left);
-                let right = Intrepreter::eval(&b.right);
+                let left = Interpreter::eval(&b.left);
+                let right = Interpreter::eval(&b.right);
                 match b.operator {
                     BinaryOperator::Minus => {
                         if let (Value::Number(n1), Value::Number(n2)) = (left, right) {
@@ -79,7 +79,7 @@ impl Intrepreter {
                     BinaryOperator::NotEqual => Value::Boolean(left != right),
                 }
             }
-            Expr::Grouping(g) => Intrepreter::eval(&g.expr),
+            Expr::Grouping(g) => Interpreter::eval(&g.expr),
             Expr::Literal(l) => match l {
                 Literal::String(s) => Value::String(s.to_string()),
                 Literal::Number(n) => Value::Number(*n),
@@ -87,7 +87,7 @@ impl Intrepreter {
                 Literal::Nil => Value::Nil,
             },
             Expr::Unary(u) => {
-                let right = Intrepreter::eval(&u.right);
+                let right = Interpreter::eval(&u.right);
                 match u.operator {
                     UnaryOperator::Minus => {
                         if let Value::Number(n) = right {
@@ -96,7 +96,7 @@ impl Intrepreter {
                             panic!("You can only negate a number")
                         }
                     }
-                    UnaryOperator::Not => Value::Boolean(!Intrepreter::is_truthy(&right)),
+                    UnaryOperator::Not => Value::Boolean(!Interpreter::is_truthy(&right)),
                 }
             }
         }
@@ -112,7 +112,7 @@ impl Intrepreter {
 
 #[cfg(test)]
 mod interpreter_tests {
-    use super::{Intrepreter, Value};
+    use super::{Interpreter, Value};
     use crate::{
         parser::{Expr, Literal, Parser, Unary, UnaryOperator},
         scanner::Scanner,
@@ -121,28 +121,28 @@ mod interpreter_tests {
     #[test]
     fn number_literal() {
         let expr = Expr::Literal(Literal::Number(123.2));
-        let value = Intrepreter::eval(&expr);
+        let value = Interpreter::eval(&expr);
         assert_eq!(value, Value::Number(123.2));
     }
 
     #[test]
     fn string_literal() {
         let expr = Expr::Literal(Literal::String("string".to_string()));
-        let value = Intrepreter::eval(&expr);
+        let value = Interpreter::eval(&expr);
         assert_eq!(value, Value::String("string".to_string()));
     }
 
     #[test]
     fn bool_literal() {
         let expr = Expr::Literal(Literal::Boolean(false));
-        let value = Intrepreter::eval(&expr);
+        let value = Interpreter::eval(&expr);
         assert_eq!(value, Value::Boolean(false));
     }
 
     #[test]
     fn nil_literal() {
         let expr = Expr::Literal(Literal::Nil);
-        let value = Intrepreter::eval(&expr);
+        let value = Interpreter::eval(&expr);
         assert_eq!(value, Value::Nil);
     }
 
@@ -153,7 +153,7 @@ mod interpreter_tests {
             right: Box::new(Expr::Literal(Literal::Number(42.0))),
         });
 
-        let val = Intrepreter::eval(&expr);
+        let val = Interpreter::eval(&expr);
         assert_eq!(val, Value::Number(-42.0));
     }
 
@@ -164,7 +164,7 @@ mod interpreter_tests {
             right: Box::new(Expr::Literal(Literal::Boolean(false))),
         });
 
-        let val = Intrepreter::eval(&expr);
+        let val = Interpreter::eval(&expr);
         assert_eq!(val, Value::Boolean(true));
     }
 
@@ -175,7 +175,7 @@ mod interpreter_tests {
         let tokens = scanner.scan_tokens();
         let mut parser = Parser::new(tokens.clone());
         let expr = parser.expression();
-        let val = Intrepreter::eval(&expr);
+        let val = Interpreter::eval(&expr);
         assert_eq!(val, Value::Number(2.0));
     }
 
@@ -187,6 +187,6 @@ mod interpreter_tests {
         let tokens = scanner.scan_tokens();
         let mut parser = Parser::new(tokens.clone());
         let expr = parser.expression();
-        let _ = Intrepreter::eval(&expr);
+        let _ = Interpreter::eval(&expr);
     }
 }
