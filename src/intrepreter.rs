@@ -178,4 +178,15 @@ mod interpreter_tests {
         let val = Intrepreter::eval(&expr);
         assert_eq!(val, Value::Number(2.0));
     }
+
+    #[test]
+    #[should_panic]
+    fn incorrect_binary_expression() {
+        let source = r#"2 * (3 / -"muffin")"#.to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        let mut parser = Parser::new(tokens.clone());
+        let expr = parser.expression();
+        let _ = Intrepreter::eval(&expr);
+    }
 }
