@@ -6,6 +6,12 @@ pub struct Parser {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum Stmt {
+    Expression(Expr),
+    Print(Expr)
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
     Binary(Binary),
     Unary(Unary),
@@ -267,11 +273,41 @@ impl Parser {
             panic!("{:#?} {}", self.peek(), err_msg);
         }
     }
+
+    pub fn parse(&mut self) -> Vec<Stmt> {
+        let mut statements: Vec<Stmt> = vec![];
+        while !self.is_at_end() {
+            statements.push(self.statement());
+        }
+        statements
+    }
+
+    fn statement(&mut self) -> Stmt {
+        match self.tokens[self.current].kind {
+            TokenKind::Print => {
+                self.advance();
+                self.print_statement()
+            },
+            _ => self.expression_statement()
+        }
+    }
+
+    fn print_statement(&mut self) -> Stmt {
+        let value = self.expression();
+        self.consume(TokenKind::Semicolon, "Expect ';' after value.");
+        Stmt::Print(value)
+    }
+
+    fn expression_statement(&mut self) -> Stmt {
+        let expr = self.expression();
+        self.consume(TokenKind::Semicolon, "Expect ';' after expression.");
+        Stmt::Expression(expr)
+    }
 }
 
 #[cfg(test)]
 mod parser_tests {
-    use super::Parser;
+    use super::{Parser, Stmt, Expr};
     use crate::{parser::Literal, scanner::Scanner};
 
     #[test]

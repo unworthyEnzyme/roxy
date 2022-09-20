@@ -1,4 +1,4 @@
-use crate::parser::{BinaryOperator, Expr, Literal, UnaryOperator};
+use crate::parser::{BinaryOperator, Expr, Literal, UnaryOperator, Stmt};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
@@ -106,6 +106,26 @@ impl Interpreter {
             Value::Boolean(b) => *b,
             _ => true,
         }
+    }
+    pub fn interpret(statements: Vec<Stmt>) {
+        for stmt in statements {
+            Interpreter::execute(stmt);
+        }
+    }
+
+    fn execute(stmt: Stmt) {
+        match stmt {
+            Stmt::Print(expr) => {
+                let value = Interpreter::eval(&expr);
+                match value {
+                    Value::String(v) => println!("{}", v),
+                    Value::Boolean(v) => println!("{}", v),
+                    Value::Nil => println!("nil"),
+                    Value::Number(v) => println!("{}", v)
+                }
+            },
+            _ => todo!("Expression statement")
+        };
     }
 }
 
