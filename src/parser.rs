@@ -8,7 +8,8 @@ pub struct Parser {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Stmt {
     Expression(Expr),
-    Print(Expr)
+    Print(Expr),
+    Var { name: String, initializer: Expr },
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -277,7 +278,7 @@ impl Parser {
     pub fn parse(&mut self) -> Vec<Stmt> {
         let mut statements: Vec<Stmt> = vec![];
         while !self.is_at_end() {
-            statements.push(self.statement());
+            statements.push(self.declaration());
         }
         statements
     }
@@ -287,8 +288,8 @@ impl Parser {
             TokenKind::Print => {
                 self.advance();
                 self.print_statement()
-            },
-            _ => self.expression_statement()
+            }
+            _ => self.expression_statement(),
         }
     }
 
@@ -303,11 +304,39 @@ impl Parser {
         self.consume(TokenKind::Semicolon, "Expect ';' after expression.");
         Stmt::Expression(expr)
     }
+
+    fn declaration(&mut self) -> Stmt {
+        if self.match_tokens(vec![TokenKind::Var]) {
+            self.var_declaration()
+        } else {
+            self.statement()
+        }
+    }
+
+    fn var_declaration(&mut self) -> Stmt {
+        // i am not sure how to remove this `.clone()` call.
+        let name = self.tokens[self.current].clone();
+        self.advance();
+        let mut initializer = Expr::Literal(Literal::Nil);
+        if self.match_tokens(vec![TokenKind::Equal]) {
+            initializer = self.expression();
+        }
+
+        self.consume(
+            TokenKind::Semicolon,
+            "Expect ';' after variable declaration",
+        );
+        if let TokenKind::Identifier(name) = name.kind {
+            Stmt::Var { name, initializer }
+        } else {
+            panic!("Variable declarations require an identifier")
+        }
+    }
 }
 
 #[cfg(test)]
 mod parser_tests {
-    use super::{Parser, Stmt, Expr};
+    use super::{Expr, Parser, Stmt};
     use crate::{parser::Literal, scanner::Scanner};
 
     #[test]
@@ -341,5 +370,21 @@ mod parser_tests {
         let mut parser = Parser::new(tokens.clone());
         let expr = parser.expression();
         println!("{:#?}", expr);
+    }
+
+    #[test]
+    fn var_declaration() {
+        let source = r#"var age = 26;"#.to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        let mut parser = Parser::new(tokens.clone());
+        let program = parser.parse();
+        assert_eq!(
+            program,
+            vec![Stmt::Var {
+                name: "age".to_string(),
+                initializer: Expr::Literal(Literal::Number(26.0))
+            }]
+        )
     }
 }
