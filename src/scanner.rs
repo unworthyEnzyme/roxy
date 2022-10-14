@@ -412,61 +412,20 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::LeftParen,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::RightParen,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::LeftBrace,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::RightBrace,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Comma,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Minus,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Star,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Semicolon,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                }
+                TokenKind::LeftParen,
+                TokenKind::RightParen,
+                TokenKind::LeftBrace,
+                TokenKind::RightBrace,
+                TokenKind::Comma,
+                TokenKind::Minus,
+                TokenKind::Star,
+                TokenKind::Semicolon,
+                TokenKind::EOF,
             ]
         )
     }
@@ -479,61 +438,20 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::LeftParen,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::RightParen,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::LeftBrace,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::RightBrace,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Comma,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Minus,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Star,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Semicolon,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                },
+                TokenKind::LeftParen,
+                TokenKind::RightParen,
+                TokenKind::LeftBrace,
+                TokenKind::RightBrace,
+                TokenKind::Comma,
+                TokenKind::Minus,
+                TokenKind::Star,
+                TokenKind::Semicolon,
+                TokenKind::EOF,
             ]
         );
     }
@@ -544,81 +462,24 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::Bang,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::BangEqual,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Minus,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Minus,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Equal,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EqualEqual,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Less,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::LessEqual,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Greater,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::GreaterEqual,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Star,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Slash,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                },
+                TokenKind::Bang,
+                TokenKind::BangEqual,
+                TokenKind::Minus,
+                TokenKind::Minus,
+                TokenKind::Equal,
+                TokenKind::EqualEqual,
+                TokenKind::Less,
+                TokenKind::LessEqual,
+                TokenKind::Greater,
+                TokenKind::GreaterEqual,
+                TokenKind::Star,
+                TokenKind::Slash,
+                TokenKind::EOF,
             ]
         );
     }
@@ -632,36 +493,15 @@ mod tests {
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::LeftParen,
-                    line: 1,
-                    pos: 0,
-                },
-                Token {
-                    kind: TokenKind::RightParen,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Comma,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                }
+                TokenKind::LeftParen,
+                TokenKind::RightParen,
+                TokenKind::Comma,
+                TokenKind::EOF,
             ]
         )
     }
@@ -676,36 +516,19 @@ literal""#
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::StringLiteral("This is a string literal".to_string()),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::StringLiteral(
-                        "This is a
+                TokenKind::StringLiteral("This is a string literal".to_string()),
+                TokenKind::StringLiteral(
+                    "This is a
 multiline string
 literal"
-                            .to_string()
-                    ),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                }
+                        .to_string()
+                ),
+                TokenKind::EOF,
             ]
         )
     }
@@ -746,91 +569,26 @@ literal"
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone())
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::And,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Class,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::False,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Fun,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::If,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Nil,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Or,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Print,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Return,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Super,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::This,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::True,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Var,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::While,
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                }
+                TokenKind::And,
+                TokenKind::Class,
+                TokenKind::False,
+                TokenKind::Fun,
+                TokenKind::If,
+                TokenKind::Nil,
+                TokenKind::Or,
+                TokenKind::Print,
+                TokenKind::Return,
+                TokenKind::Super,
+                TokenKind::This,
+                TokenKind::True,
+                TokenKind::Var,
+                TokenKind::While,
+                TokenKind::EOF,
             ]
         )
     }
@@ -841,41 +599,16 @@ literal"
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| Token {
-                kind: token.kind.clone(),
-                // Because i don't want to track positions when writing tests.
-                line: 1,
-                pos: 0,
-            })
-            .collect::<Vec<Token>>();
+            .map(|token| token.kind.clone(),)
+            .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
             vec![
-                Token {
-                    kind: TokenKind::Identifier("variable".to_string()),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Identifier("iffy".to_string()),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Identifier("classy".to_string()),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::Identifier("snake_case_variable".to_string()),
-                    line: 1,
-                    pos: 0
-                },
-                Token {
-                    kind: TokenKind::EOF,
-                    line: 1,
-                    pos: 0
-                },
+                TokenKind::Identifier("variable".to_string()),
+                TokenKind::Identifier("iffy".to_string()),
+                TokenKind::Identifier("classy".to_string()),
+                TokenKind::Identifier("snake_case_variable".to_string()),
+                TokenKind::EOF,
             ]
         );
     }
