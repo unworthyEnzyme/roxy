@@ -10,6 +10,7 @@ pub enum Stmt {
     Expression(Expr),
     Print(Expr),
     Var { name: String, initializer: Expr },
+    Block(Vec<Stmt>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -288,6 +289,10 @@ impl Parser {
                 self.advance();
                 self.print_statement()
             }
+            TokenKind::LeftBrace => {
+                self.advance();
+                self.block()
+            }
             _ => self.expression_statement(),
         }
     }
@@ -330,6 +335,16 @@ impl Parser {
         } else {
             panic!("Variable declarations require an identifier")
         }
+    }
+
+    fn block(&mut self) -> Stmt {
+        let mut statements = vec![];
+        while !self.check(TokenKind::RightBrace) && !self.is_at_end() {
+            statements.push(self.declaration());
+        }
+
+        self.consume(TokenKind::RightBrace, "Expected a '}' after block");
+        Stmt::Block(statements)
     }
 }
 
@@ -384,6 +399,36 @@ mod parser_tests {
                 name: "age".to_string(),
                 initializer: Expr::Literal(Literal::Number(26.0))
             }]
+        )
+    }
+
+    #[test]
+    fn block() {
+        let source = r#"
+        {
+            var a = 12;
+            {
+                var b = 12;
+            }
+        }
+        "#
+        .to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        let mut parser = Parser::new(tokens.clone());
+        let program = parser.parse();
+        assert_eq!(
+            program,
+            vec![Stmt::Block(vec![
+                Stmt::Var {
+                    name: "a".to_string(),
+                    initializer: Expr::Literal(Literal::Number(12.0))
+                },
+                Stmt::Block(vec![Stmt::Var {
+                    name: "b".to_string(),
+                    initializer: Expr::Literal(Literal::Number(12.0))
+                }])
+            ])]
         )
     }
 }

@@ -121,10 +121,16 @@ impl Interpreter {
                     Value::String(v) => println!("{}", v),
                     Value::Boolean(v) => println!("{}", v),
                     Value::Nil => println!("nil"),
-                    Value::Number(v) => println!("{}", v)
+                    Value::Number(v) => println!("{}", v),
                 }
-            },
-            _ => todo!("Expression statement")
+            }
+            Stmt::Expression(expr) => {
+                //This has no side-effect as far as i can see
+                //so why do we do this?
+                let _ = Interpreter::eval(&expr);
+            }
+            Stmt::Var { name, initializer } => todo!(),
+            Stmt::Block(_) => todo!(),
         };
     }
 }
