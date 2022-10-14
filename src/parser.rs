@@ -211,7 +211,6 @@ impl Parser {
     fn unary(&mut self) -> Expr {
         if self.match_tokens(vec![TokenKind::Bang, TokenKind::Minus]) {
             let operator = self.previous();
-            print!("{:?}", operator);
             let operator = match operator.kind {
                 TokenKind::Bang => UnaryOperator::Not,
                 TokenKind::Minus => UnaryOperator::Minus,
