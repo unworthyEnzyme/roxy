@@ -599,7 +599,7 @@ literal"
         let tokens = scanner
             .scan_tokens()
             .iter()
-            .map(|token| token.kind.clone(),)
+            .map(|token| token.kind.clone())
             .collect::<Vec<TokenKind>>();
         assert_eq!(
             *tokens,
