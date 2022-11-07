@@ -131,6 +131,7 @@ impl Interpreter {
             }
             Stmt::Var { name, initializer } => todo!(),
             Stmt::Block(_) => todo!(),
+            _ => todo!(),
         };
     }
 }

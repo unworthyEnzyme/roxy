@@ -9,8 +9,16 @@ pub struct Parser {
 pub enum Stmt {
     Expression(Expr),
     Print(Expr),
-    Var { name: String, initializer: Expr },
+    Var {
+        name: String,
+        initializer: Expr,
+    },
     Block(Vec<Stmt>),
+    If {
+        condition: Expr,
+        then_branch: Box<Stmt>,
+        else_branch: Option<Box<Stmt>>,
+    },
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -293,6 +301,10 @@ impl Parser {
                 self.advance();
                 self.block()
             }
+            TokenKind::If => {
+                self.advance();
+                self.if_statement()
+            }
             _ => self.expression_statement(),
         }
     }
@@ -346,11 +358,29 @@ impl Parser {
         self.consume(TokenKind::RightBrace, "Expected a '}' after block");
         Stmt::Block(statements)
     }
+
+    fn if_statement(&mut self) -> Stmt {
+        self.consume(TokenKind::LeftParen, "Expect '(' after 'if'");
+        let condition = self.expression();
+        self.consume(TokenKind::RightParen, "Expect ')' after if condtion");
+
+        let then_branch = self.statement();
+        let mut else_branch: Option<Box<Stmt>> = None;
+        if self.match_tokens(vec![TokenKind::Else]) {
+            else_branch = Some(Box::new(self.statement()));
+        }
+
+        Stmt::If {
+            condition,
+            then_branch: Box::new(then_branch),
+            else_branch,
+        }
+    }
 }
 
 #[cfg(test)]
 mod parser_tests {
-    use super::{Expr, Parser, Stmt};
+    use super::{Binary, BinaryOperator, Expr, Parser, Stmt};
     use crate::{parser::Literal, scanner::Scanner};
 
     #[test]
@@ -429,6 +459,40 @@ mod parser_tests {
                     initializer: Expr::Literal(Literal::Number(12.0))
                 }])
             ])]
+        )
+    }
+
+    #[test]
+    fn if_else_statement() {
+        let source = r#"
+            if (2 == 2) {
+                var x = 23;
+            } else {
+                var y = 23;
+            }
+        "#
+        .to_string();
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        let mut parser = Parser::new(tokens.clone());
+        let program = parser.parse();
+        assert_eq!(
+            program,
+            vec![Stmt::If {
+                condition: Expr::Binary(Binary {
+                    left: Box::new(Expr::Literal(Literal::Number(2.0))),
+                    right: Box::new(Expr::Literal(Literal::Number(2.0))),
+                    operator: BinaryOperator::EqualEqual
+                }),
+                then_branch: Box::new(Stmt::Block(vec![Stmt::Var {
+                    name: "x".to_string(),
+                    initializer: Expr::Literal(Literal::Number(23.0))
+                }])),
+                else_branch: Some(Box::new(Stmt::Block(vec![Stmt::Var {
+                    name: "y".to_string(),
+                    initializer: Expr::Literal(Literal::Number(23.0))
+                }])))
+            }]
         )
     }
 }
